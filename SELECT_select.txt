@@ -1,0 +1,119 @@
+name	        continent	area	    population	    gdp
+Afghanistan	    Asia	    652230	    25500100	    20343000000
+Albania	        Europe	    28748	    2831741	        12960000000
+Algeria	        Africa	    2381741	    37100000	    188681000000
+Andorra	        Europe	    468	        78115	        3712000000
+Angola	        Africa	    1246700	    20609294	    100990000000
+
+
+1.
+List each country name where the population is larger than that of 'Russia'
+
+SELECT name
+    FROM world
+   WHERE population >
+        (SELECT population FROM world
+         Where name = 'Russia')
+
+2.
+Show the countries in Europe with a per capita GDP greater than the 'United Kingdom'
+
+SELECT name
+    FROM world
+   WHERE continent = 'Europe' AND gdp/ population >
+    (SELECT gdp / population FROM world
+    WHERE name = 'United Kingdom')
+
+3.
+List the name and continent of countries in the continents containing either Argentina or Australia. Order by name
+of the country
+
+SELECT name, continent
+    FROM world
+   WHERE continent IN ('South America', 'Oceania')
+    ORDER BY name
+
+4.
+Which country has a population that is more than Canada but less than poland?
+Show the name and population
+
+SELECT name, population
+    FROM world
+   WHERE population > name = 'Canada' AND population < name = 'Poland'
+!This does not work, you need to use select statements (varies slightly from Python)!
+
+SELECT name, population
+    FROM world
+   WHERE population > (SELECT population FROM world WHERE name = 'Canada') AND
+    population < (SELECT population FROM world WHERE name = 'Poland')
+
+5.
+Show the name and the population of each country in Europe. Show the population as a percentage of the
+population of germany
+
+SELECT name, population
+    FROM world
+   WHERE population / (SELECT population FROM world WHERE name = 'Germany')
+!This does not work!
+Time to introduce CONCAT, which brings together multiple inputs
+
+SELECT name, CONCAT(ROUND(population/(SELECT population FROM world WHERE name = 'Germany') * 100.0), '%')
+    FROM world
+   WHERE continent = 'Europe'
+! The top line is where the magic happens we divide the population of the country by Germany, round that to two
+decimal places, multiply by 100 to make it a percentage. CONCAT it to add a percentage at the end
+
+6.
+Which countries have a GDP greater than every country in Europe?
+
+SELECT name
+    FROM world
+   WHERE gdp > ALL(SELECT gdp FROM world WHERE continent = 'Europe' AND gdp > 0)
+!All returns true if all of the subquery values meet the condition!
+!So here it returns all gdp values for Europe and when there is a value!
+
+7.
+Find the largest country (by area) in each continent, show the continent, name, area
+
+SELECT x.continent, x.name, x.area
+    FROM world AS x
+   WHERE x.area = (
+    SELECT MAX(y.area)
+    FROM world AS y
+    WHERE x.continent = y.continent)
+
+8.
+List each continent and the name of the country that comes first alphabetically
+
+SELECT continent, name
+    FROM world AS x
+   WHERE name = (
+    SELECT name
+    FROM world AS y
+    WHERE x.continent = y.continent
+    ORDER BY name ASC
+    LIMIT 1)
+
+9.
+Find the continents where all countries have a population <= 25000000. Then find the names of the countries
+associated with these continents. Show the name, continent, and population
+
+SELECT x.name, x.continent, x.population
+    FROM world  AS x
+    WHERE 25000000 > ALL (
+    SELECT y.population
+    FROM world AS y
+    WHERE x.continent = y.continent)
+
+10.
+Some countries have populations more than three times that of any of their neighbours (in the same continent).
+Give countries and continents
+
+SELECT x.name, x.continent
+    FROM world AS x
+    WHERE population / 3 > ALL (
+    SELECT y.population
+    FROM world AS y
+    WHERE x.continent = y.continent
+    AND x.name != y.name)
+

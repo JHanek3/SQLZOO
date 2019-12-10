@@ -1,0 +1,82 @@
+name	        region	        area	    population	gdp
+Afghanistan	    South Asia	    652225	    26000000
+Albania	        Europe	        28728	    3200000	    6656000000
+Algeria	        Middle East	    2400000	    32900000	75012000000
+Andorra	        Europe	        468	        64000
+Bangladesh	    South Asia	    143998	    152600000	67144000000
+United Kingdom	Europe	        242514	    59600000	2022824000000
+
+
+
+1.Write the code that shows the name, region and population of the smallest country in each region
+
+SELECT x.name, x.region, x.population
+    FROM bbc AS x
+   WHERE x.population <=  ALL(SELECT y.population FROM bbc AS y WHERE b.region = a.region)
+
+#Input answer
+SELECT region, name, population
+    FROM bbc AS x
+   WHERE population <= ALL(SELECT population FROM bbc AS y WHERE y.region = x.region AND population > 0)
+
+2.
+Write the code that shows the countries belonging to regions with all populations over 50000
+
+SELECT x.name, x.region, x.population
+    FROM bbc AS x
+   WHERE 50000 < ALL(SELECT population from bbc AS y WHERE y.region = x.region AND y.population > 0)
+
+#Input answer
+SELECT name, region, population
+    FROM bbc x
+   WHERE 50000< ALL(SELECT population FROM bbc y WHERE x.region = y.region AND y.population > 0)
+
+3.
+Select the code that shows the countries with a less than a third of the population around it
+
+SELECT x.name, x.region
+    FROM bbc AS x
+   WHERE x.population < ALL (SELECT population / 3 FROM bbc AS y WHERE x.region = y.region AND y.name != x.name)
+
+4.
+Write the result that would be obtained from the following code
+SELECT name FROM bbc
+    WHERE population > (SELECT population FROM bbc WHERE name = 'United Kingdom') AND region IN (SELECT region FROM bbc
+                        WHERE name = 'United Kingdom')
+!It's going to show names where the population is greater than UK and the in the same region as UK
+
+France
+Germany
+Russia
+Turkey
+
+5.
+Write the code that would show the countries with a greater GDP than any country in Africa (some countries may
+have NULL gdp values)
+
+SELECT name FROM bbc WHERE gdp > ALL(SELECT gdp FROM bbc WHERE region = 'Africa' AND gdp > 0)
+!I think this works, but you can make it shorter by just finding the max gdp!
+
+#Input Answer
+SELECT name
+    FROM bbc
+   WHERE gdp > (SELECT(MAX(gdp) FROM bbc WHERE region = 'Africa')
+
+6.
+Write the code that shows the countries with population smaller than Russia but bigger than Denmark
+
+SELECT name
+    FROM bbc
+   WHERE population < (SELECT population FROM bbc WHERE name = 'Russia')
+   AND population > (SELECT population FROM bbc WHERE name = 'Denmark')
+
+7.
+What would be the result from the following code
+SELECT name FROM bbc
+WHERE population > ALL(SELECT MAX(population) FROM bbc WHERE region = 'Europe') AND region = 'South Asia'
+# So the result needs to have more people than the max population in Europe and be apart of South Asia
+
+Bangladesh
+India
+Pakistan
+
